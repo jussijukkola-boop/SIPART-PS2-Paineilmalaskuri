@@ -29,7 +29,7 @@
             align-items: flex-start;
         }
         h1 {
-            color: #ffffff;
+            color: #ffffff; /* Valkoinen otsikko */
             font-size: 2.5em;
             margin: 0 0 20px 0;
             font-weight: 700;
@@ -51,7 +51,7 @@
         }
         label {
             font-weight: 600;
-            color: #1e3a8a;
+            color: #ffffff; /* Valkoinen, oli aiemmin tummansininen */
             min-width: 200px;
             text-align: right;
             margin-right: 10px;
@@ -66,8 +66,8 @@
         }
         button {
             padding: 12px 25px;
-            background: #1e3a8a;
-            color: #ffffff;
+            background: #ffffff; /* Valkoinen nappi, oli tummansininen */
+            color: #000000;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -75,7 +75,7 @@
             transition: background 0.3s;
         }
         button:hover {
-            background: #152e6a;
+            background: #e0e0e0; /* Vaaleampi valkoinen hover */
         }
         .results {
             flex: 1;
@@ -93,13 +93,13 @@
         }
         .savings {
             font-size: 2em;
-            color: #ffffff;
+            color: #ffffff; /* Valkoinen säästöteksti */
             font-weight: 700;
             text-align: center;
             padding: 15px;
-            background: #d3d3d3;
+            background: #d3d3d3; /* Vaaleanharmaa */
             border-radius: 10px;
-            border: 2px solid #1e3a8a;
+            border: 2px solid #ffffff; /* Valkoinen reuna, oli tummansininen */
             width: 80%;
             margin-top: 20px;
         }
@@ -108,7 +108,7 @@
             color: #bbbbbb;
         }
         .fixed-value {
-            color: #1e3a8a;
+            color: #ffffff; /* Valkoinen, oli tummansininen */
             font-weight: 600;
         }
         table {
@@ -122,8 +122,8 @@
             border: 1px solid #333333;
         }
         th {
-            background: #1e3a8a;
-            color: #ffffff;
+            background: #ffffff; /* Valkoinen taulukko-otsikot, oli tummansininen */
+            color: #000000;
         }
         td {
             color: #ffffff;
@@ -155,7 +155,7 @@
             <div class="input-group">
                 <label>Sähkönhinta (€/kWh):</label>
                 <input type="number" id="electricityCost" value="0.8" min="0.01" step="0.01">
-                <button onclick="calculateSavings()">Suomen-keskiarvo</button>
+                <button onclick="document.getElementById('electricityCost').value = '0.8'; calculateSavings();">Suomen-keskiarvo</button>
                 <span class="info">(Tyypillinen arvo 2025)</span>
             </div>
             <div class="input-group">
@@ -171,7 +171,7 @@
                 <label>Asennoittimien määrä:</label>
                 <input type="number" id="quantity" value="1" min="1" max="100">
             </div>
-            <button onclick="calculateSavings()">Laske säästöt</button>
+            <button id="calculateButton">Laske säästöt</button>
         </div>
         <div class="results">
             <div class="chart-container">
@@ -231,7 +231,7 @@
                     datasets: [{
                         label: 'Kustannus (€)',
                         data: [ps2Cost, competitorCost],
-                        backgroundColor: ['#1e3a8a', '#d3d3d3'],
+                        backgroundColor: ['#ffffff', '#d3d3d3'], // Valkoinen ja vaaleanharmaa
                         borderWidth: 1
                     }]
                 },
@@ -242,12 +242,14 @@
             });
         }
 
-        // Varmistetaan, että painike toimii
+        // Varmistetaan, että "Laske säästöt" -painike toimii
         document.addEventListener('DOMContentLoaded', () => {
-            const calculateButton = document.querySelectorAll('button');
-            calculateButton.forEach(button => {
-                button.addEventListener('click', calculateSavings);
-            });
+            const calculateButton = document.getElementById('calculateButton');
+            if (calculateButton) {
+                calculateButton.addEventListener('click', calculateSavings);
+            } else {
+                console.error('Calculate button not found!');
+            }
         });
     </script>
 </body>
