@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIPART PS2 Energiansäästölaskuri</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #007bff; text-align: center; }
+        .input-group { margin: 10px 0; }
+        label { font-weight: bold; }
+        input, select { padding: 5px; margin-left: 10px; }
+        button { padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background: #218838; }
+        .results { margin-top: 20px; }
+        .chart-container { position: relative; margin: 20px 0; height: 300px; }
+        .savings { font-size: 24px; color: #28a745; font-weight: bold; text-align: center; }
+        .info { font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SIPART PS2 Energiansäästölaskuri</h1>
+        <div class="input-group">
+            <label>Vertailtava laite:</label>
+            <select id="device">
+                <option value="metso">Metso ND9000 (0,931 Nm³/h)</option>
+                <option value="custom">Muu laite (syötä kulutus)</option>
+            </select>
+            <input type="number" id="customConsumption" placeholder="Nm³/h" min="0.001" max="5" step="0.001" style="display:none;">
+        </div>
+        <div class="input-group">
+            <label>Sähkönhinta (€/kWh):</label>
+            <input type="number" id="electricityCost" value="0.20" min="0.01" step="0.01">
+            <button onclick="document.getElementById('electricityCost').value = '0.20'">Eurooppa-keskiarvo</button>
+            <span class="info">(Tyypillinen arvo 2025)</span>
+        </div>
+        <div class="input-group">
+            <label>Vertailuaika (vuodet):</label>
+            <select id="years">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Asenninten määrä:</label>
+            <input type="number" id="quantity" value="1" min="1" max="100">
+        </div>
+        <button onclick="calculateSavings()">Laske säästöt</button>
+        <div class="results" id="results" style="display:none;">
+            <div class="savings" id="savingsText"></div>
+            <div class="chart-container">
+                <canvas id="barChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+            <table id="comparisonTable" border="1" style="width:100%; margin-top:20px;">
+                <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let barChart, pieChart;
+        const ps2Consumption = 0.036; // Nm³/h, vakioarvo Siemensin specseistä
+        const metsoConsumption = 0.931; // Nm³/h, vakioarvo Metson specseistä
+        const capacity = 0.11; // kWh/Nm³, vakioarvo
+        const efficiency = 0.80; // %, vakioarvo
+        const hoursPerYear = 8760; // h/vuosi
+
+        document.getElementById('device').addEventListener('change', function() {
+            document.getElementById('customConsumption').style.display = (this.value === 'custom') ? 'inline' : 'none';
+        });
+
+        function calculateEnergy(consumption) {
+            const annualAir = consumption * hoursPerYear;
+            return (annualAir * capacity) / efficiency;
+        }
+
+        function calculateCost(energy, costPerKWh, years) {
+            return energy * costPerKWh * years;
+        }
+
+        function calculateSavings() {
+            const device = document.getElementById('device').value;
+            const customConsumption = parseFloat(document.getElementById('customConsumption').value) || 0;
+            const consumption = (device === 'custom' && customConsumption > 0) ? customConsumption : (device === 'metso' ? metsoConsumption : 0);
+            const electricityCost = parseFloat(document.getElementById('electricityCost').value) || 0.20;
+            const years = parseInt(document.getElementById('years').value);
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+
+            const ps2Energy = calculateEnergy(ps2Consumption) * quantity;
+            const ps2Cost = calculateCost(ps2Energy, electricityCost, years);
+            const competitorEnergy = calculateEnergy(consumption) * quantity;
+            const competitorCost = calculateCost(competitorEnergy, electricityCost, years);
+            const savings = competitorCost - ps2Cost;
+
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('savingsText').textContent = `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asenninta)`;
+
+            // Päivitä taulukko
+            const table = document.getElementById('comparisonTable');
+            table.innerHTML = `<tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
+                <tr><td>Siemens SIPART PS2</td><td>${ps2Consumption.toFixed(3)}</td><td>${(ps2Energy / years).toFixed(2)}</td><td>${ps2Cost.toFixed(2)}</td></tr>
+                <tr><td>Vast. laite
