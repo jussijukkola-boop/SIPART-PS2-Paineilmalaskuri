@@ -66,4 +66,74 @@
         </div>
         <div class="input-group">
             <label>Asennoittimien määrä:</label>
-            <input type="
+            <input type="number" id="quantity" value="1" min="1" max="100">
+        </div>
+        <button onclick="calculateSavings()">Laske säästöt</button>
+        <div class="results" id="results" style="display:none;">
+            <div class="savings" id="savingsText"></div>
+            <div class="chart-container">
+                <canvas id="barChart"></canvas>
+            </div>
+            <table id="comparisonTable" border="1" style="width:100%; margin-top:20px;">
+                <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let barChart;
+        const ps2Consumption = 0.01; // Nm³/h, vakioarvo pyyntösi mukaan
+        const capacity = 0.11; // kWh/Nm³, vakioarvo
+        const efficiency = 0.80; // %, vakioarvo
+        const hoursPerYear = 8760; // h/vuosi
+
+        function calculateEnergy(consumption) {
+            const annualAir = consumption * hoursPerYear;
+            return (annualAir * capacity) / efficiency;
+        }
+
+        function calculateCost(energy, costPerKWh, years) {
+            return energy * costPerKWh * years;
+        }
+
+        function calculateSavings() {
+            const competitorConsumption = parseFloat(document.getElementById('competitorConsumption').value.replace(',', '.')) || 0.931;
+            const electricityCost = parseFloat(document.getElementById('electricityCost').value) || 0.8;
+            const years = parseInt(document.getElementById('years').value);
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+
+            const ps2Energy = calculateEnergy(ps2Consumption) * quantity;
+            const ps2Cost = calculateCost(ps2Energy, electricityCost, years);
+            const competitorEnergy = calculateEnergy(competitorConsumption) * quantity;
+            const competitorCost = calculateCost(competitorEnergy, electricityCost, years);
+            const savings = competitorCost - ps2Cost;
+
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('savingsText').textContent = `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asennoittimien)`;
+
+            // Päivitä taulukko
+            const table = document.getElementById('comparisonTable');
+            table.innerHTML = `<tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
+                <tr><td>Siemens SIPART PS2</td><td>${ps2Consumption.toFixed(3)}</td><td>${(ps2Energy / years).toFixed(2)}</td><td>${ps2Cost.toFixed(2)}</td></tr>
+                <tr><td>Yleisesti käytetty asennoitin Suomessa</td><td>${competitorConsumption.toFixed(3)}</td><td>${(competitorEnergy / years).toFixed(2)}</td><td>${competitorCost.toFixed(2)}</td></tr>`;
+
+            // Baari-kaavio
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            if (barChart) barChart.destroy();
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['SIPART PS2', 'Yleisesti käytetty asennoitin'],
+                    datasets: [{
+                        label: 'Kustannus (€)',
+                        data: [ps2Cost, competitorCost],
+                        backgroundColor: ['#10b981', '#f87171'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { position: 'top' } } }
+            });
+        }
+    </script>
+</body>
+</html>
