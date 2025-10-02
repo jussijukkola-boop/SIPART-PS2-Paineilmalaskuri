@@ -18,18 +18,28 @@
         .chart-container { position: relative; margin: 20px 0; height: 300px; }
         .savings { font-size: 24px; color: #28a745; font-weight: bold; text-align: center; }
         .info { font-size: 12px; color: #666; }
+        .fixed-value { color: #28a745; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>SIPART PS2 Energiansäästölaskuri</h1>
         <div class="input-group">
-            <label>Vertailtava laite:</label>
+            <label>Valittu laite:</label>
             <select id="device">
-                <option value="metso">Metso ND9000 (0,931 Nm³/h)</option>
-                <option value="custom">Muu laite (syötä kulutus)</option>
+                <option value="metso">Metso ND9000</option>
+                <option value="custom">Muu laite</option>
             </select>
-            <input type="number" id="customConsumption" placeholder="Nm³/h" min="0.001" max="5" step="0.001" style="display:none;">
+        </div>
+        <div class="input-group">
+            <label>SIPART PS2 paineilmankulutus:</label>
+            <span class="fixed-value">0,01 Nm³/h</span>
+            <span class="info">(Kiinteä arvo)</span>
+        </div>
+        <div class="input-group">
+            <label>Kilpailevan asennnoittimen paineilmankulutus:</label>
+            <input type="number" id="competitorConsumption" value="0,931" min="0.001" max="5" step="0.001" placeholder="Nm³/h" style="display:inline;">
+            <span class="info">(Metso ND9000: 0,931 Nm³/h oletus)</span>
         </div>
         <div class="input-group">
             <label>Sähkönhinta (€/kWh):</label>
@@ -46,7 +56,7 @@
             </select>
         </div>
         <div class="input-group">
-            <label>Asenninten määrä:</label>
+            <label>Asennoittimien määrä:</label>
             <input type="number" id="quantity" value="1" min="1" max="100">
         </div>
         <button onclick="calculateSavings()">Laske säästöt</button>
@@ -66,15 +76,10 @@
 
     <script>
         let barChart, pieChart;
-        const ps2Consumption = 0.036; // Nm³/h, vakioarvo Siemensin specseistä
-        const metsoConsumption = 0.931; // Nm³/h, vakioarvo Metson specseistä
+        const ps2Consumption = 0.01; // Nm³/h, vakioarvo pyyntösi mukaan
         const capacity = 0.11; // kWh/Nm³, vakioarvo
         const efficiency = 0.80; // %, vakioarvo
         const hoursPerYear = 8760; // h/vuosi
-
-        document.getElementById('device').addEventListener('change', function() {
-            document.getElementById('customConsumption').style.display = (this.value === 'custom') ? 'inline' : 'none';
-        });
 
         function calculateEnergy(consumption) {
             const annualAir = consumption * hoursPerYear;
@@ -86,24 +91,56 @@
         }
 
         function calculateSavings() {
-            const device = document.getElementById('device').value;
-            const customConsumption = parseFloat(document.getElementById('customConsumption').value) || 0;
-            const consumption = (device === 'custom' && customConsumption > 0) ? customConsumption : (device === 'metso' ? metsoConsumption : 0);
+            const competitorConsumption = parseFloat(document.getElementById('competitorConsumption').value.replace(',', '.')) || 0.931;
             const electricityCost = parseFloat(document.getElementById('electricityCost').value) || 0.20;
             const years = parseInt(document.getElementById('years').value);
             const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
             const ps2Energy = calculateEnergy(ps2Consumption) * quantity;
             const ps2Cost = calculateCost(ps2Energy, electricityCost, years);
-            const competitorEnergy = calculateEnergy(consumption) * quantity;
+            const competitorEnergy = calculateEnergy(competitorConsumption) * quantity;
             const competitorCost = calculateCost(competitorEnergy, electricityCost, years);
             const savings = competitorCost - ps2Cost;
 
             document.getElementById('results').style.display = 'block';
-            document.getElementById('savingsText').textContent = `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asenninta)`;
+            document.getElementById('savingsText').textContent = `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asennnoittimen)`;
 
             // Päivitä taulukko
             const table = document.getElementById('comparisonTable');
             table.innerHTML = `<tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
                 <tr><td>Siemens SIPART PS2</td><td>${ps2Consumption.toFixed(3)}</td><td>${(ps2Energy / years).toFixed(2)}</td><td>${ps2Cost.toFixed(2)}</td></tr>
-                <tr><td>Vast. laite
+                <tr><td>Vast. laite</td><td>${competitorConsumption.toFixed(3)}</td><td>${(competitorEnergy / years).toFixed(2)}</td><td>${competitorCost.toFixed(2)}</td></tr>`;
+
+            // Baari- ja piirakkakaaviot
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            if (barChart) barChart.destroy();
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['SIPART PS2', 'Vast. laite'],
+                    datasets: [{
+                        label: 'Kustannus (€)',
+                        data: [ps2Cost, competitorCost],
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true } } }
+            });
+
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            if (pieChart) pieChart.destroy();
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['SIPART PS2', 'Vast. laite'],
+                    datasets: [{
+                        data: [ps2Cost, competitorCost],
+                        backgroundColor: ['#28a745', '#dc3545']
+                    }]
+                }
+            });
+        }
+    </script>
+</body>
+</html>
