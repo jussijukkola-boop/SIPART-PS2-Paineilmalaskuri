@@ -16,18 +16,27 @@
             align-items: center;
             min-height: 100vh;
         }
+
         .container {
-            max-width: 1600px; /* Rajattu leveys koko näytölle sopimaan */
-            width: 90%; /* Käyttää 90% näytön leveydestä */
+            max-width: 1600px;
+            width: 90%;
             background: #1a1a1a;
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
             display: flex;
-            flex-direction: row;
+            flex-direction: column; /* Aluksi kaikki keskellä pystysuorassa */
+            align-items: center;
+            transition: all 0.8s ease;
+        }
+
+        .container.split {
+            flex-direction: row; /* Kun tulokset näkyy → vasen & oikea */
             justify-content: space-between;
             align-items: stretch;
         }
+
         h1 {
             color: #ffffff;
             font-size: 2.5em;
@@ -36,14 +45,18 @@
             text-align: center;
             width: 100%;
         }
+
         .calculator {
             flex: 1;
-            min-width: 600px; /* Lisää tilaa vasemmalle */
-            margin-right: 40px;
+            min-width: 400px;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
+            align-items: stretch;
+            transition: all 0.8s ease;
         }
+
         .input-group {
             margin: 15px 0;
             display: flex;
@@ -52,13 +65,15 @@
             width: 100%;
             justify-content: flex-start;
         }
+
         label {
             font-weight: 600;
             color: #ffffff;
-            min-width: 250px; /* Lisää leveyttä symmetrialle */
+            min-width: 250px;
             text-align: right;
             margin-right: 15px;
         }
+
         input, select {
             padding: 10px;
             border: 2px solid #333333;
@@ -69,10 +84,11 @@
             flex: 1;
             max-width: 200px;
         }
+
         button {
             padding: 12px 25px;
-            background: #ffffff;
-            color: #000000;
+            background: #003366; /* tummansininen */
+            color: #ffffff; /* valkoinen teksti */
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -81,58 +97,72 @@
             margin-top: 20px;
             align-self: flex-start;
         }
+
         button:hover {
-            background: #e0e0e0;
+            background: #004080;
         }
+
         .results {
             flex: 1;
-            min-width: 600px; /* Tasapainottaa oikean puolen */
+            min-width: 400px;
+            max-width: 500px;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
         }
+
+        .results.active {
+            display: flex;
+        }
+
         .chart-container {
             position: relative;
             margin: 20px 0;
             width: 100%;
-            max-width: 500px;
-            height: 400px; /* Lisää korkeutta kaaviolle */
+            height: 400px;
         }
+
         .savings {
             font-size: 2em;
             color: #ffffff;
             font-weight: 700;
             text-align: center;
             padding: 15px;
-            background: #d3d3d3;
+            background: #003366;
             border-radius: 10px;
             border: 2px solid #ffffff;
-            width: 80%;
+            width: 100%; /* Kaikki tulospalkit yhtä leveitä */
             margin-top: 20px;
         }
+
         .info {
             font-size: 0.9em;
             color: #bbbbbb;
         }
+
         .fixed-value {
             color: #ffffff;
             font-weight: 600;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
         }
+
         th, td {
             padding: 12px;
             text-align: left;
             border: 1px solid #333333;
         }
+
         th {
             background: #ffffff;
             color: #000000;
         }
+
         td {
             color: #ffffff;
             background-color: #2a2a2a;
@@ -140,9 +170,9 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="mainContainer">
         <h1>SIPART PS2 Energiansäästölaskuri</h1>
-        <div class="calculator">
+        <div class="calculator" id="calculator">
             <div class="input-group">
                 <label>Valittu laite:</label>
                 <select id="device">
@@ -157,14 +187,13 @@
             </div>
             <div class="input-group">
                 <label>Yleisesti käytetyn asennoittimen paineilmankulutus:</label>
-                <input type="number" id="competitorConsumption" value="0.931" min="0.001" max="5" step="0.001" placeholder="Nm³/h">
+                <input type="number" id="competitorConsumption" value="0.931" min="0.001" max="5" step="0.001">
                 <span class="info">(Oletus: 0.931 Nm³/h)</span>
             </div>
             <div class="input-group">
                 <label>Sähkönhinta (€/kWh):</label>
                 <input type="number" id="electricityCost" value="0.8" min="0.01" step="0.01">
                 <button onclick="document.getElementById('electricityCost').value = '0.8'; calculateSavings();">Suomen-keskiarvo</button>
-                <span class="info">(Tyypillinen arvo 2025)</span>
             </div>
             <div class="input-group">
                 <label>Vertailuaika (vuodet):</label>
@@ -173,7 +202,6 @@
                     <option value="5">5</option>
                     <option value="10">10</option>
                 </select>
-                <span class="info">(Oletus: 24/7 käyttö valitun ajanjakson aikana)</span>
             </div>
             <div class="input-group">
                 <label>Asennoittimien määrä:</label>
@@ -185,7 +213,7 @@
             <div class="chart-container">
                 <canvas id="barChart"></canvas>
             </div>
-            <table id="comparisonTable" border="1">
+            <table id="comparisonTable">
                 <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
             </table>
             <div class="savings" id="savingsText"></div>
@@ -197,8 +225,8 @@
 
         function calculateEnergy(consumption) {
             const hoursPerYear = 8760;
-            const capacity = 0.11; // kWh/Nm³
-            const efficiency = 0.80; // %
+            const capacity = 0.11;
+            const efficiency = 0.80;
             const annualAir = consumption * hoursPerYear;
             return (annualAir * capacity) / efficiency;
         }
@@ -222,9 +250,14 @@
             const savings = competitorCost - ps2Cost;
 
             const results = document.getElementById('results');
+            const container = document.getElementById('mainContainer');
+
             if (results) {
-                results.style.display = 'flex';
-                document.getElementById('savingsText').textContent = `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asennoittimien)`;
+                results.classList.add("active");
+                container.classList.add("split");
+
+                document.getElementById('savingsText').textContent =
+                    `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asennoittimen)`; 
 
                 const table = document.getElementById('comparisonTable');
                 table.innerHTML = `
@@ -242,27 +275,26 @@
                         datasets: [{
                             label: 'Kustannus (€)',
                             data: [ps2Cost, competitorCost],
-                            backgroundColor: ['#ffffff', '#d3d3d3'],
+                            backgroundColor: ['#003366', '#888888'],
                             borderWidth: 1
                         }]
                     },
                     options: {
-                        scales: { y: { beginAtZero: true, ticks: { color: '#ffffff' } } },
+                        scales: { 
+                            y: { 
+                                beginAtZero: true, 
+                                ticks: { color: '#ffffff' } 
+                            }, 
+                            x: { ticks: { color: '#ffffff' } } 
+                        },
                         plugins: { legend: { labels: { color: '#ffffff' } } }
                     }
                 });
-            } else {
-                console.error('Results element not found!');
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const calculateButton = document.getElementById('calculateButton');
-            if (calculateButton) {
-                calculateButton.addEventListener('click', calculateSavings);
-            } else {
-                console.error('Calculate button not found!');
-            }
+            document.getElementById('calculateButton').addEventListener('click', calculateSavings);
         });
     </script>
 </body>
