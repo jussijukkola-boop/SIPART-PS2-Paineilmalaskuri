@@ -6,22 +6,120 @@
     <title>SIPART PS2 Energiansäästölaskuri</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #f0f4f8, #d9e2ec); }
-        .container { max-width: 900px; margin: 40px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        h1 { color: #1e3a8a; font-size: 2.5em; margin: 0; font-weight: 700; text-align: center; }
-        .input-group { margin: 15px 0; display: flex; align-items: center; gap: 10px; }
-        label { font-weight: 600; color: #1e3a8a; min-width: 200px; }
-        input, select { padding: 10px; border: 2px solid #e2e8f0; border-radius: 5px; font-size: 1em; }
-        button { padding: 12px 25px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; transition: background 0.3s; }
-        button:hover { background: #2563eb; }
-        .results { margin-top: 30px; }
-        .chart-container { position: relative; margin: 20px 0; height: 400px; }
-        .savings { font-size: 2em; color: #10b981; font-weight: 700; text-align: center; padding: 15px; background: #d1fae5; border-radius: 10px; }
-        .info { font-size: 0.9em; color: #64748b; }
-        .fixed-value { color: #10b981; font-weight: 600; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border: 1px solid #e2e8f0; }
-        th { background: #3b82f6; color: white; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000000; /* Musta tausta */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1800px; /* Sopii useimmille näytöille ilman skrollausta */
+            width: 100%;
+            background: #1a1a1a; /* Tumma harmaa mustan taustan päällä */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #00ffcc; /* Vaalea turkoosi otsikolle mustalla taustalla */
+            font-size: 2.5em;
+            margin: 0 0 20px 0;
+            font-weight: 700;
+            text-align: center;
+        }
+        .input-group {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap; /* Mahdollistaa rivinvaihdot, jos ruutu on kapea */
+            width: 100%;
+            justify-content: center;
+        }
+        label {
+            font-weight: 600;
+            color: #00ffcc;
+            min-width: 200px;
+            text-align: right;
+            margin-right: 10px;
+        }
+        input, select {
+            padding: 10px;
+            border: 2px solid #333333;
+            border-radius: 5px;
+            font-size: 1em;
+            background-color: #2a2a2a;
+            color: #ffffff;
+        }
+        button {
+            padding: 12px 25px;
+            background: #00ffcc;
+            color: #000000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #00b894;
+        }
+        .results {
+            margin-top: 30px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .chart-container {
+            position: relative;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 800px; /* Rajoitettu kaavion leveys */
+            height: 300px; /* Pienempi korkeus vaakasuuntaan sopimaan */
+        }
+        .savings {
+            font-size: 2em;
+            color: #00ffcc;
+            font-weight: 700;
+            text-align: center;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            border: 2px solid #00ffcc;
+        }
+        .info {
+            font-size: 0.9em;
+            color: #bbbbbb;
+        }
+        .fixed-value {
+            color: #00ffcc;
+            font-weight: 600;
+        }
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #333333;
+        }
+        th {
+            background: #00ffcc;
+            color: #000000;
+        }
+        td {
+            color: #ffffff;
+            background-color: #2a2a2a;
+        }
     </style>
 </head>
 <body>
@@ -69,7 +167,7 @@
             <div class="chart-container">
                 <canvas id="barChart"></canvas>
             </div>
-            <table id="comparisonTable" border="1" style="width:100%; margin-top:20px;">
+            <table id="comparisonTable" border="1">
                 <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
             </table>
         </div>
@@ -122,11 +220,14 @@
                     datasets: [{
                         label: 'Kustannus (€)',
                         data: [ps2Cost, competitorCost],
-                        backgroundColor: ['#10b981', '#f87171'],
+                        backgroundColor: ['#00ffcc', '#ff4d4d'],
                         borderWidth: 1
                     }]
                 },
-                options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { position: 'top' } } }
+                options: { 
+                    scales: { y: { beginAtZero: true, ticks: { color: '#ffffff' } } },
+                    plugins: { legend: { labels: { color: '#ffffff' } } }
+                }
             });
         }
     </script>
