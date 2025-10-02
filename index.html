@@ -1,301 +1,305 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIPART PS2 Energiansäästölaskuri</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #000000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIPART PS2 Energiansäästölaskuri</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
 
-        .container {
-            max-width: 1600px;
-            width: 90%;
-            background: #1a1a1a;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    .wrapper {
+      width: 100%;
+      max-width: 1600px;
+      padding: 30px;
+    }
 
-            display: flex;
-            flex-direction: column; /* Aluksi kaikki keskellä pystysuorassa */
-            align-items: center;
-            transition: all 0.8s ease;
-        }
+    h1 {
+      color: #fff;
+      font-size: 2.5em;
+      font-weight: 700;
+      text-align: center; /* pakottaa keskelle */
+      margin-bottom: 30px;
+    }
 
-        .container.split {
-            flex-direction: row; /* Kun tulokset näkyy → vasen & oikea */
-            justify-content: space-between;
-            align-items: stretch;
-        }
+    .container {
+      background: #1a1a1a;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      transition: all 0.8s ease;
+    }
 
-        h1 {
-            color: #ffffff;
-            font-size: 2.5em;
-            margin: 0 0 30px 0;
-            font-weight: 700;
-            text-align: center;
-            width: 100%;
-        }
+    .container.split {
+      flex-direction: row;   /* kun tulokset näkyy */
+      justify-content: space-between;
+      align-items: flex-start;
+    }
 
-        .calculator {
-            flex: 1;
-            min-width: 400px;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: stretch;
-            transition: all 0.8s ease;
-        }
+    .calculator {
+      flex: 1;
+      min-width: 400px;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .input-group {
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            width: 100%;
-            justify-content: flex-start;
-        }
+    .input-group {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      width: 100%;
+      justify-content: flex-start;
+    }
 
-        label {
-            font-weight: 600;
-            color: #ffffff;
-            min-width: 250px;
-            text-align: right;
-            margin-right: 15px;
-        }
+    label {
+      font-weight: 600;
+      color: #fff;
+      min-width: 220px;
+      text-align: right;
+      margin-right: 15px;
+    }
 
-        input, select {
-            padding: 10px;
-            border: 2px solid #333333;
-            border-radius: 5px;
-            font-size: 1em;
-            background-color: #2a2a2a;
-            color: #ffffff;
-            flex: 1;
-            max-width: 200px;
-        }
+    input, select {
+      padding: 10px;
+      border: 2px solid #333;
+      border-radius: 5px;
+      font-size: 1em;
+      background-color: #2a2a2a;
+      color: #fff;
+      flex: 1;
+      max-width: 200px;
+    }
 
-        button {
-            padding: 12px 25px;
-            background: #003366; /* tummansininen */
-            color: #ffffff; /* valkoinen teksti */
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.3s;
-            margin-top: 20px;
-            align-self: flex-start;
-        }
+    button {
+      padding: 12px 25px;
+      background: #003366;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+      margin-top: 20px;
+      align-self: flex-start;
+    }
 
-        button:hover {
-            background: #004080;
-        }
+    button:hover {
+      background: #004080;
+    }
 
-        .results {
-            flex: 1;
-            min-width: 400px;
-            max-width: 500px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-        }
+    .results {
+      flex: 1;
+      min-width: 400px;
+      max-width: 500px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        .results.active {
-            display: flex;
-        }
+    .results.active {
+      display: flex;
+    }
 
-        .chart-container {
-            position: relative;
-            margin: 20px 0;
-            width: 100%;
-            height: 400px;
-        }
+    .chart-container {
+      margin: 20px 0;
+      width: 100%;
+      height: 400px;
+    }
 
-        .savings {
-            font-size: 2em;
-            color: #ffffff;
-            font-weight: 700;
-            text-align: center;
-            padding: 15px;
-            background: #003366;
-            border-radius: 10px;
-            border: 2px solid #ffffff;
-            width: 100%; /* Kaikki tulospalkit yhtä leveitä */
-            margin-top: 20px;
-        }
+    .savings {
+      font-size: 2em;
+      color: #fff;
+      font-weight: 700;
+      text-align: center;
+      padding: 15px;
+      background: #003366;
+      border-radius: 10px;
+      border: 2px solid #fff;
+      width: 100%;
+      margin-top: 20px;
+    }
 
-        .info {
-            font-size: 0.9em;
-            color: #bbbbbb;
-        }
+    .info {
+      font-size: 0.9em;
+      color: #bbb;
+    }
 
-        .fixed-value {
-            color: #ffffff;
-            font-weight: 600;
-        }
+    .fixed-value {
+      color: #fff;
+      font-weight: 600;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
 
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border: 1px solid #333333;
-        }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border: 1px solid #333;
+    }
 
-        th {
-            background: #ffffff;
-            color: #000000;
-        }
+    th {
+      background: #fff;
+      color: #000;
+    }
 
-        td {
-            color: #ffffff;
-            background-color: #2a2a2a;
-        }
-    </style>
+    td {
+      color: #fff;
+      background-color: #2a2a2a;
+    }
+  </style>
 </head>
 <body>
+  <div class="wrapper">
+    <h1>SIPART PS2 Energiansäästölaskuri</h1>
     <div class="container" id="mainContainer">
-        <h1>SIPART PS2 Energiansäästölaskuri</h1>
-        <div class="calculator" id="calculator">
-            <div class="input-group">
-                <label>Valittu laite:</label>
-                <select id="device">
-                    <option value="generic">Yleisesti käytetty asennoitin Suomessa</option>
-                    <option value="custom">Muu laite</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>SIPART PS2 paineilmankulutus:</label>
-                <span class="fixed-value">0,01 Nm³/h</span>
-                <span class="info">(Kiinteä arvo)</span>
-            </div>
-            <div class="input-group">
-                <label>Yleisesti käytetyn asennoittimen paineilmankulutus:</label>
-                <input type="number" id="competitorConsumption" value="0.931" min="0.001" max="5" step="0.001">
-                <span class="info">(Oletus: 0.931 Nm³/h)</span>
-            </div>
-            <div class="input-group">
-                <label>Sähkönhinta (€/kWh):</label>
-                <input type="number" id="electricityCost" value="0.8" min="0.01" step="0.01">
-                <button onclick="document.getElementById('electricityCost').value = '0.8'; calculateSavings();">Suomen-keskiarvo</button>
-            </div>
-            <div class="input-group">
-                <label>Vertailuaika (vuodet):</label>
-                <select id="years">
-                    <option value="1">1</option>
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Asennoittimien määrä:</label>
-                <input type="number" id="quantity" value="1" min="1" max="100">
-            </div>
-            <button id="calculateButton">Laske säästöt</button>
+      <div class="calculator" id="calculator">
+        <div class="input-group">
+          <label>Valittu laite:</label>
+          <select id="device">
+            <option value="generic">Yleisesti käytetty asennoitin Suomessa</option>
+            <option value="custom">Muu laite</option>
+          </select>
         </div>
-        <div class="results" id="results">
-            <div class="chart-container">
-                <canvas id="barChart"></canvas>
-            </div>
-            <table id="comparisonTable">
-                <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
-            </table>
-            <div class="savings" id="savingsText"></div>
+        <div class="input-group">
+          <label>SIPART PS2 paineilmankulutus:</label>
+          <span class="fixed-value">0,01 Nm³/h</span>
+          <span class="info">(Kiinteä arvo)</span>
         </div>
+        <div class="input-group">
+          <label>Yleisesti käytetyn asennoittimen paineilmankulutus:</label>
+          <input type="number" id="competitorConsumption" value="0.931" min="0.001" max="5" step="0.001">
+          <span class="info">(Oletus: 0.931 Nm³/h)</span>
+        </div>
+        <div class="input-group">
+          <label>Sähkönhinta (€/kWh):</label>
+          <input type="number" id="electricityCost" value="0.8" min="0.01" step="0.01">
+          <button onclick="document.getElementById('electricityCost').value = '0.8'; calculateSavings();">Suomen-keskiarvo</button>
+        </div>
+        <div class="input-group">
+          <label>Vertailuaika (vuodet):</label>
+          <select id="years">
+            <option value="1">1</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Asennoittimien määrä:</label>
+          <input type="number" id="quantity" value="1" min="1" max="100">
+        </div>
+        <button id="calculateButton">Laske säästöt</button>
+      </div>
+      <div class="results" id="results">
+        <div class="chart-container">
+          <canvas id="barChart"></canvas>
+        </div>
+        <table id="comparisonTable">
+          <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
+        </table>
+        <div class="savings" id="savingsText"></div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        let barChart;
+  <script>
+    let barChart;
 
-        function calculateEnergy(consumption) {
-            const hoursPerYear = 8760;
-            const capacity = 0.11;
-            const efficiency = 0.80;
-            const annualAir = consumption * hoursPerYear;
-            return (annualAir * capacity) / efficiency;
-        }
+    function calculateEnergy(consumption) {
+      const hoursPerYear = 8760;
+      const capacity = 0.11;
+      const efficiency = 0.80;
+      const annualAir = consumption * hoursPerYear;
+      return (annualAir * capacity) / efficiency;
+    }
 
-        function calculateCost(energy, costPerKWh, years) {
-            return energy * costPerKWh * years;
-        }
+    function calculateCost(energy, costPerKWh, years) {
+      return energy * costPerKWh * years;
+    }
 
-        function calculateSavings() {
-            const competitorConsumptionInput = document.getElementById('competitorConsumption').value.replace(',', '.');
-            const competitorConsumption = parseFloat(competitorConsumptionInput) || 0.931;
-            const electricityCost = parseFloat(document.getElementById('electricityCost').value) || 0.8;
-            const years = parseInt(document.getElementById('years').value) || 1;
-            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    function calculateSavings() {
+      const competitorConsumptionInput = document.getElementById('competitorConsumption').value.replace(',', '.');
+      const competitorConsumption = parseFloat(competitorConsumptionInput) || 0.931;
+      const electricityCost = parseFloat(document.getElementById('electricityCost').value) || 0.8;
+      const years = parseInt(document.getElementById('years').value) || 1;
+      const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
-            const ps2Consumption = 0.01;
-            const ps2Energy = calculateEnergy(ps2Consumption) * quantity;
-            const ps2Cost = calculateCost(ps2Energy, electricityCost, years);
-            const competitorEnergy = calculateEnergy(competitorConsumption) * quantity;
-            const competitorCost = calculateCost(competitorEnergy, electricityCost, years);
-            const savings = competitorCost - ps2Cost;
+      const ps2Consumption = 0.01;
+      const ps2Energy = calculateEnergy(ps2Consumption) * quantity;
+      const ps2Cost = calculateCost(ps2Energy, electricityCost, years);
+      const competitorEnergy = calculateEnergy(competitorConsumption) * quantity;
+      const competitorCost = calculateCost(competitorEnergy, electricityCost, years);
+      const savings = competitorCost - ps2Cost;
 
-            const results = document.getElementById('results');
-            const container = document.getElementById('mainContainer');
+      const results = document.getElementById('results');
+      const container = document.getElementById('mainContainer');
 
-            if (results) {
-                results.classList.add("active");
-                container.classList.add("split");
+      if (results) {
+        results.classList.add("active");
+        container.classList.add("split");
 
-                document.getElementById('savingsText').textContent =
-                    `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asennoittimen)`; 
+        document.getElementById('savingsText').textContent =
+          `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asennoittimen)`;
 
-                const table = document.getElementById('comparisonTable');
-                table.innerHTML = `
-                    <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
-                    <tr><td>Siemens SIPART PS2</td><td>${ps2Consumption.toFixed(3)}</td><td>${(ps2Energy / years).toFixed(2)}</td><td>${ps2Cost.toFixed(2)}</td></tr>
-                    <tr><td>Yleisesti käytetty asennoitin Suomessa</td><td>${competitorConsumption.toFixed(3)}</td><td>${(competitorEnergy / years).toFixed(2)}</td><td>${competitorCost.toFixed(2)}</td></tr>
-                `;
+        const table = document.getElementById('comparisonTable');
+        table.innerHTML = `
+          <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
+          <tr><td>Siemens SIPART PS2</td><td>${ps2Consumption.toFixed(3)}</td><td>${(ps2Energy / years).toFixed(2)}</td><td>${ps2Cost.toFixed(2)}</td></tr>
+          <tr><td>Yleisesti käytetty asennoitin Suomessa</td><td>${competitorConsumption.toFixed(3)}</td><td>${(competitorEnergy / years).toFixed(2)}</td><td>${competitorCost.toFixed(2)}</td></tr>
+        `;
 
-                const barCtx = document.getElementById('barChart').getContext('2d');
-                if (barChart) barChart.destroy();
-                barChart = new Chart(barCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['SIPART PS2', 'Yleisesti käytetty asennoitin'],
-                        datasets: [{
-                            label: 'Kustannus (€)',
-                            data: [ps2Cost, competitorCost],
-                            backgroundColor: ['#003366', '#888888'],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: { 
-                            y: { 
-                                beginAtZero: true, 
-                                ticks: { color: '#ffffff' } 
-                            }, 
-                            x: { ticks: { color: '#ffffff' } } 
-                        },
-                        plugins: { legend: { labels: { color: '#ffffff' } } }
-                    }
-                });
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        if (barChart) barChart.destroy();
+        barChart = new Chart(barCtx, {
+          type: 'bar',
+          data: {
+            labels: ['SIPART PS2', 'Yleisesti käytetty asennoitin'],
+            datasets: [{
+              label: 'Kustannus (€)',
+              data: [ps2Cost, competitorCost],
+              backgroundColor: ['#003366', '#888888'],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { color: '#fff' }
+              },
+              x: {
+                ticks: { color: '#fff' }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: '#fff' } }
             }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('calculateButton').addEventListener('click', calculateSavings);
+          }
         });
-    </script>
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('calculateButton').addEventListener('click', calculateSavings);
+    });
+  </script>
 </body>
 </html>
