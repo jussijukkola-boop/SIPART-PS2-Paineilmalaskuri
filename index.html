@@ -51,7 +51,7 @@
         }
         label {
             font-weight: 600;
-            color: #ffffff; /* Valkoinen */
+            color: #ffffff;
             min-width: 200px;
             text-align: right;
             margin-right: 10px;
@@ -66,7 +66,7 @@
         }
         button {
             padding: 12px 25px;
-            background: #ffffff; /* Valkoinen */
+            background: #ffffff;
             color: #000000;
             border: none;
             border-radius: 5px;
@@ -75,12 +75,12 @@
             transition: background 0.3s;
         }
         button:hover {
-            background: #e0e0e0; /* Vaaleampi valkoinen */
+            background: #e0e0e0;
         }
         .results {
             flex: 1;
             min-width: 400px;
-            display: flex;
+            display: none; /* Aluksi piilotettu */
             flex-direction: column;
             align-items: center;
         }
@@ -97,9 +97,9 @@
             font-weight: 700;
             text-align: center;
             padding: 15px;
-            background: #d3d3d3; /* Vaaleanharmaa */
+            background: #d3d3d3;
             border-radius: 10px;
-            border: 2px solid #ffffff; /* Valkoinen reuna */
+            border: 2px solid #ffffff;
             width: 80%;
             margin-top: 20px;
         }
@@ -108,7 +108,7 @@
             color: #bbbbbb;
         }
         .fixed-value {
-            color: #ffffff; /* Valkoinen */
+            color: #ffffff;
             font-weight: 600;
         }
         table {
@@ -122,7 +122,7 @@
             border: 1px solid #333333;
         }
         th {
-            background: #ffffff; /* Valkoinen */
+            background: #ffffff;
             color: #000000;
         }
         td {
@@ -149,8 +149,8 @@
             </div>
             <div class="input-group">
                 <label>Yleisesti käytetyn asennoittimen paineilmankulutus:</label>
-                <input type="number" id="competitorConsumption" value="0,931" min="0.001" max="5" step="0.001" placeholder="Nm³/h">
-                <span class="info">(Oletus: 0,931 Nm³/h)</span>
+                <input type="number" id="competitorConsumption" value="0.931" min="0.001" max="5" step="0.001" placeholder="Nm³/h">
+                <span class="info">(Oletus: 0.931 Nm³/h)</span>
             </div>
             <div class="input-group">
                 <label>Sähkönhinta (€/kWh):</label>
@@ -173,7 +173,7 @@
             </div>
             <button id="calculateButton">Laske säästöt</button>
         </div>
-        <div class="results">
+        <div class="results" id="results">
             <div class="chart-container">
                 <canvas id="barChart"></canvas>
             </div>
@@ -200,7 +200,8 @@
         }
 
         function calculateSavings() {
-            const competitorConsumption = parseFloat(document.getElementById('competitorConsumption').value.replace(',', '.')) || 0.931;
+            const competitorConsumptionInput = document.getElementById('competitorConsumption').value.replace(',', '.');
+            const competitorConsumption = parseFloat(competitorConsumptionInput) || 0.931;
             const electricityCost = parseFloat(document.getElementById('electricityCost').value) || 0.8;
             const years = parseInt(document.getElementById('years').value) || 1;
             const quantity = parseInt(document.getElementById('quantity').value) || 1;
@@ -212,34 +213,39 @@
             const competitorCost = calculateCost(competitorEnergy, electricityCost, years);
             const savings = competitorCost - ps2Cost;
 
-            document.getElementById('results').style.display = 'block';
-            document.getElementById('savingsText').textContent = `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asennoittimien)`;
+            const results = document.getElementById('results');
+            if (results) {
+                results.style.display = 'flex';
+                document.getElementById('savingsText').textContent = `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asennoittimien)`;
 
-            const table = document.getElementById('comparisonTable');
-            table.innerHTML = `
-                <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
-                <tr><td>Siemens SIPART PS2</td><td>${ps2Consumption.toFixed(3)}</td><td>${(ps2Energy / years).toFixed(2)}</td><td>${ps2Cost.toFixed(2)}</td></tr>
-                <tr><td>Yleisesti käytetty asennoitin Suomessa</td><td>${competitorConsumption.toFixed(3)}</td><td>${(competitorEnergy / years).toFixed(2)}</td><td>${competitorCost.toFixed(2)}</td></tr>
-            `;
+                const table = document.getElementById('comparisonTable');
+                table.innerHTML = `
+                    <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
+                    <tr><td>Siemens SIPART PS2</td><td>${ps2Consumption.toFixed(3)}</td><td>${(ps2Energy / years).toFixed(2)}</td><td>${ps2Cost.toFixed(2)}</td></tr>
+                    <tr><td>Yleisesti käytetty asennoitin Suomessa</td><td>${competitorConsumption.toFixed(3)}</td><td>${(competitorEnergy / years).toFixed(2)}</td><td>${competitorCost.toFixed(2)}</td></tr>
+                `;
 
-            const barCtx = document.getElementById('barChart').getContext('2d');
-            if (barChart) barChart.destroy();
-            barChart = new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['SIPART PS2', 'Yleisesti käytetty asennoitin'],
-                    datasets: [{
-                        label: 'Kustannus (€)',
-                        data: [ps2Cost, competitorCost],
-                        backgroundColor: ['#ffffff', '#d3d3d3'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: { y: { beginAtZero: true, ticks: { color: '#ffffff' } } },
-                    plugins: { legend: { labels: { color: '#ffffff' } } }
-                }
-            });
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                if (barChart) barChart.destroy();
+                barChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['SIPART PS2', 'Yleisesti käytetty asennoitin'],
+                        datasets: [{
+                            label: 'Kustannus (€)',
+                            data: [ps2Cost, competitorCost],
+                            backgroundColor: ['#ffffff', '#d3d3d3'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: { y: { beginAtZero: true, ticks: { color: '#ffffff' } } },
+                        plugins: { legend: { labels: { color: '#ffffff' } } }
+                    }
+                });
+            } else {
+                console.error('Results element not found!');
+            }
         }
 
         // Varmista, että painike toimii
