@@ -2,57 +2,52 @@
 <html lang="fi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIPART PS2 Energiansäästölaskuri</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #111;
-      color: #fff;
+      background-color: #1a1a1a;
+      color: #f0f0f0;
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
     .header {
       display: flex;
       align-items: center;
       justify-content: center; /* keskittää logon ja otsikon */
-      margin: 20px 0;
-      gap: 15px; /* väli logon ja otsikon väliin */
+      gap: 15px;
+      padding: 20px;
+      background-color: #222;
     }
 
     .logo {
-      max-height: 60px; /* voit säätää kokoa */
+      max-width: 150px;
       height: auto;
-      width: auto;
     }
 
     h1 {
+      text-align: center;
       font-size: 2em;
       margin: 0;
     }
 
     .container {
       display: flex;
+      flex-direction: row;
       justify-content: space-between;
-      align-items: flex-start;
-      width: 90%;
-      max-width: 1200px;
-      background-color: #1e1e1e;
-      border-radius: 15px;
       padding: 20px;
-      gap: 20px;
     }
 
     .form-container {
-      flex: 1;
-      max-width: 400px;
+      background-color: #2a2a2a;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
       display: flex;
       flex-direction: column;
-      align-items: flex-start; /* kaikki vasempaan */
+      align-items: flex-start;
     }
 
     .input-group {
@@ -65,9 +60,9 @@
 
     label {
       font-weight: 600;
+      color: #fff;
       margin-bottom: 5px;
       text-align: left;
-      width: 100%;
     }
 
     input, select {
@@ -82,14 +77,16 @@
     }
 
     button {
-      padding: 10px 20px;
       background-color: #003366;
-      color: #fff;
+      color: white;
       border: none;
+      padding: 12px 20px;
       border-radius: 8px;
       cursor: pointer;
+      margin-top: 15px;
       font-size: 1em;
-      margin-top: 10px;
+      font-weight: bold;
+      transition: background-color 0.3s;
     }
 
     button:hover {
@@ -97,164 +94,92 @@
     }
 
     .results {
-      flex: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
+      flex: 1;
+      margin-left: 20px;
     }
 
-    .results table {
-      border-collapse: collapse;
-      width: 100%;
-      max-width: 600px;
-    }
-
-    .results th, .results td {
-      border: 1px solid #444;
-      padding: 8px;
-      text-align: center;
-    }
-
-    .results th {
-      background-color: #333;
-    }
-
-    .savings-box {
-      background-color: #003366;
-      color: #fff;
-      font-size: 1.2em;
+    .result-item {
+      background-color: #2a2a2a;
       padding: 15px;
-      border-radius: 10px;
-      text-align: center;
+      margin: 10px 0;
+      border-radius: 8px;
       width: 100%;
-      max-width: 600px;
+      max-width: 400px;
+    }
+
+    canvas {
+      margin-top: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 10px;
     }
   </style>
 </head>
 <body>
-
   <div class="header">
-    <img src="logo.png" alt="Jukkola Systems Logo" class="logo">
+    <img src="Jukkolalogo.png" alt="Jukkola Systems Logo" class="logo">
     <h1>SIPART PS2 Energiansäästölaskuri</h1>
   </div>
 
   <div class="container">
     <div class="form-container">
       <div class="input-group">
-        <label for="device">Valittu laite:</label>
+        <label for="device">Laite</label>
         <select id="device">
-          <option value="general">Yleisesti käytetty asennotin</option>
-          <option value="sipart">Siemens SIPART PS2</option>
+          <option value="pumppu">Pumppu</option>
+          <option value="moottori">Moottori</option>
+          <option value="kompressori">Kompressori</option>
         </select>
       </div>
 
       <div class="input-group">
-        <label>SIPART PS2 paineilmankulutus: <span id="sipartValue">0,01</span> Nm³/h (Kiinteä arvo)</label>
+        <label for="price">Sähkön hinta (€/kWh)</label>
+        <input type="number" id="price" value="0.12" step="0.01">
       </div>
 
       <div class="input-group">
-        <label for="general">Yleisesti käytetyn asennottimen paineilmankulutus:</label>
-        <input type="number" id="general" step="0.001" value="0.931">
+        <label for="usage">Vuotuinen kulutus (kWh)</label>
+        <input type="number" id="usage" value="10000">
       </div>
 
-      <div class="input-group">
-        <label for="price">Sähkönhinta (€/kWh):</label>
-        <input type="number" id="price" step="0.01" value="0.8">
-        <button id="averageBtn">Suomen-keskiarvo</button>
-      </div>
-
-      <div class="input-group">
-        <label for="years">Vertailuaika (vuodet):</label>
-        <select id="years">
-          <option value="1">1</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-        </select>
-      </div>
-
-      <div class="input-group">
-        <label for="units">Asennottimien määrä:</label>
-        <input type="number" id="units" min="1" value="1">
-      </div>
-
-      <button id="calculate">Laske säästöt</button>
+      <button onclick="calculate()">Laske säästöt</button>
     </div>
 
     <div class="results">
+      <div class="result-item" id="savings">Säästöt: -</div>
+      <div class="result-item" id="costBefore">Kustannus ennen: -</div>
+      <div class="result-item" id="costAfter">Kustannus jälkeen: -</div>
       <canvas id="chart" width="400" height="200"></canvas>
-      <table>
-        <thead>
-          <tr>
-            <th>Laitteet</th>
-            <th>Paineilma (Nm³/h)</th>
-            <th>Energia (kWh/v)</th>
-            <th>Kustannus (€)</th>
-          </tr>
-        </thead>
-        <tbody id="results-table"></tbody>
-      </table>
-      <div class="savings-box" id="savings"></div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    const ctx = document.getElementById('chart').getContext('2d');
-    let chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['SIPART PS2', 'Yleisesti käytetty asennotin'],
-        datasets: [{
-          label: 'Kustannus (€)',
-          data: [0, 0],
-          backgroundColor: ['#0055aa', '#888']
-        }]
-      },
-      options: { responsive: true, scales: { y: { beginAtZero: true } } }
-    });
-
-    document.getElementById('calculate').addEventListener('click', () => {
-      const general = parseFloat(document.getElementById('general').value);
+    function calculate() {
       const price = parseFloat(document.getElementById('price').value);
-      const years = parseInt(document.getElementById('years').value);
-      const units = parseInt(document.getElementById('units').value);
+      const usage = parseFloat(document.getElementById('usage').value);
+      const beforeCost = price * usage;
+      const afterCost = beforeCost * 0.7; // oletetaan 30% säästö
+      const savings = beforeCost - afterCost;
 
-      const sipartFlow = 0.01;
-      const hours = 8760;
+      document.getElementById('savings').innerText = `Säästöt: ${savings.toFixed(2)} €`;
+      document.getElementById('costBefore').innerText = `Kustannus ennen: ${beforeCost.toFixed(2)} €`;
+      document.getElementById('costAfter').innerText = `Kustannus jälkeen: ${afterCost.toFixed(2)} €`;
 
-      const sipartEnergy = sipartFlow * hours * 0.1;
-      const generalEnergy = general * hours * 0.1;
-
-      const sipartCost = sipartEnergy * price * years * units;
-      const generalCost = generalEnergy * price * years * units;
-
-      const savings = generalCost - sipartCost;
-
-      chart.data.datasets[0].data = [sipartCost, generalCost];
-      chart.update();
-
-      document.getElementById('results-table').innerHTML = `
-        <tr>
-          <td>Siemens SIPART PS2</td>
-          <td>${sipartFlow.toFixed(3)}</td>
-          <td>${sipartEnergy.toFixed(2)}</td>
-          <td>${sipartCost.toFixed(2)}</td>
-        </tr>
-        <tr>
-          <td>Yleisesti käytetty asennotin Suomessa</td>
-          <td>${general.toFixed(3)}</td>
-          <td>${generalEnergy.toFixed(2)}</td>
-          <td>${generalCost.toFixed(2)}</td>
-        </tr>
-      `;
-
-      document.getElementById('savings').textContent =
-        `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${units} asennottimen)`;
-    });
-
-    document.getElementById('averageBtn').addEventListener('click', () => {
-      document.getElementById('price').value = 0.20; // esimerkkiarvo
-    });
+      const ctx = document.getElementById('chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Ennen', 'Jälkeen'],
+          datasets: [{
+            label: 'Kustannus (€)',
+            data: [beforeCost, afterCost],
+            backgroundColor: ['#cc0000', '#009900']
+          }]
+        },
+        options: { responsive: false }
+      });
+    }
   </script>
 </body>
 </html>
