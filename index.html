@@ -29,7 +29,7 @@
             align-items: flex-start;
         }
         h1 {
-            color: #ffffff; /* Valkoinen otsikko */
+            color: #ffffff;
             font-size: 2.5em;
             margin: 0 0 20px 0;
             font-weight: 700;
@@ -51,7 +51,7 @@
         }
         label {
             font-weight: 600;
-            color: #ffffff; /* Valkoinen, oli aiemmin tummansininen */
+            color: #ffffff; /* Valkoinen */
             min-width: 200px;
             text-align: right;
             margin-right: 10px;
@@ -66,7 +66,7 @@
         }
         button {
             padding: 12px 25px;
-            background: #ffffff; /* Valkoinen nappi, oli tummansininen */
+            background: #ffffff; /* Valkoinen */
             color: #000000;
             border: none;
             border-radius: 5px;
@@ -75,7 +75,7 @@
             transition: background 0.3s;
         }
         button:hover {
-            background: #e0e0e0; /* Vaaleampi valkoinen hover */
+            background: #e0e0e0; /* Vaaleampi valkoinen */
         }
         .results {
             flex: 1;
@@ -93,13 +93,13 @@
         }
         .savings {
             font-size: 2em;
-            color: #ffffff; /* Valkoinen säästöteksti */
+            color: #ffffff;
             font-weight: 700;
             text-align: center;
             padding: 15px;
             background: #d3d3d3; /* Vaaleanharmaa */
             border-radius: 10px;
-            border: 2px solid #ffffff; /* Valkoinen reuna, oli tummansininen */
+            border: 2px solid #ffffff; /* Valkoinen reuna */
             width: 80%;
             margin-top: 20px;
         }
@@ -108,7 +108,7 @@
             color: #bbbbbb;
         }
         .fixed-value {
-            color: #ffffff; /* Valkoinen, oli tummansininen */
+            color: #ffffff; /* Valkoinen */
             font-weight: 600;
         }
         table {
@@ -122,7 +122,7 @@
             border: 1px solid #333333;
         }
         th {
-            background: #ffffff; /* Valkoinen taulukko-otsikot, oli tummansininen */
+            background: #ffffff; /* Valkoinen */
             color: #000000;
         }
         td {
@@ -186,12 +186,11 @@
 
     <script>
         let barChart;
-        const ps2Consumption = 0.01; // Nm³/h, vakioarvo pyyntösi mukaan
-        const capacity = 0.11; // kWh/Nm³, vakioarvo
-        const efficiency = 0.80; // %, vakioarvo
-        const hoursPerYear = 8760; // h/vuosi
 
         function calculateEnergy(consumption) {
+            const hoursPerYear = 8760;
+            const capacity = 0.11; // kWh/Nm³
+            const efficiency = 0.80; // %
             const annualAir = consumption * hoursPerYear;
             return (annualAir * capacity) / efficiency;
         }
@@ -203,9 +202,10 @@
         function calculateSavings() {
             const competitorConsumption = parseFloat(document.getElementById('competitorConsumption').value.replace(',', '.')) || 0.931;
             const electricityCost = parseFloat(document.getElementById('electricityCost').value) || 0.8;
-            const years = parseInt(document.getElementById('years').value);
+            const years = parseInt(document.getElementById('years').value) || 1;
             const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
+            const ps2Consumption = 0.01;
             const ps2Energy = calculateEnergy(ps2Consumption) * quantity;
             const ps2Cost = calculateCost(ps2Energy, electricityCost, years);
             const competitorEnergy = calculateEnergy(competitorConsumption) * quantity;
@@ -215,13 +215,13 @@
             document.getElementById('results').style.display = 'block';
             document.getElementById('savingsText').textContent = `Säästö: ${savings.toFixed(2)} € (${years} vuodeksi, ${quantity} asennoittimien)`;
 
-            // Päivitä taulukko
             const table = document.getElementById('comparisonTable');
-            table.innerHTML = `<tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
+            table.innerHTML = `
+                <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
                 <tr><td>Siemens SIPART PS2</td><td>${ps2Consumption.toFixed(3)}</td><td>${(ps2Energy / years).toFixed(2)}</td><td>${ps2Cost.toFixed(2)}</td></tr>
-                <tr><td>Yleisesti käytetty asennoitin Suomessa</td><td>${competitorConsumption.toFixed(3)}</td><td>${(competitorEnergy / years).toFixed(2)}</td><td>${competitorCost.toFixed(2)}</td></tr>`;
+                <tr><td>Yleisesti käytetty asennoitin Suomessa</td><td>${competitorConsumption.toFixed(3)}</td><td>${(competitorEnergy / years).toFixed(2)}</td><td>${competitorCost.toFixed(2)}</td></tr>
+            `;
 
-            // Baari-kaavio
             const barCtx = document.getElementById('barChart').getContext('2d');
             if (barChart) barChart.destroy();
             barChart = new Chart(barCtx, {
@@ -231,18 +231,18 @@
                     datasets: [{
                         label: 'Kustannus (€)',
                         data: [ps2Cost, competitorCost],
-                        backgroundColor: ['#ffffff', '#d3d3d3'], // Valkoinen ja vaaleanharmaa
+                        backgroundColor: ['#ffffff', '#d3d3d3'],
                         borderWidth: 1
                     }]
                 },
-                options: { 
+                options: {
                     scales: { y: { beginAtZero: true, ticks: { color: '#ffffff' } } },
                     plugins: { legend: { labels: { color: '#ffffff' } } }
                 }
             });
         }
 
-        // Varmistetaan, että "Laske säästöt" -painike toimii
+        // Varmista, että painike toimii
         document.addEventListener('DOMContentLoaded', () => {
             const calculateButton = document.getElementById('calculateButton');
             if (calculateButton) {
