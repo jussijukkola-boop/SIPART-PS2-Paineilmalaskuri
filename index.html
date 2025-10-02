@@ -29,7 +29,7 @@
             align-items: flex-start;
         }
         h1 {
-            color: #ffffff; /* Valkoinen otsikko */
+            color: #ffffff;
             font-size: 2.5em;
             margin: 0 0 20px 0;
             font-weight: 700;
@@ -51,7 +51,7 @@
         }
         label {
             font-weight: 600;
-            color: #1e3a8a; /* Tummansininen */
+            color: #1e3a8a;
             min-width: 200px;
             text-align: right;
             margin-right: 10px;
@@ -66,7 +66,7 @@
         }
         button {
             padding: 12px 25px;
-            background: #1e3a8a; /* Tummansininen nappi */
+            background: #1e3a8a;
             color: #ffffff;
             border: none;
             border-radius: 5px;
@@ -75,7 +75,7 @@
             transition: background 0.3s;
         }
         button:hover {
-            background: #152e6a; /* Tummempi sininen hover */
+            background: #152e6a;
         }
         .results {
             flex: 1;
@@ -93,25 +93,22 @@
         }
         .savings {
             font-size: 2em;
-            color: #ffffff; /* Valkoinen säästöteksti */
+            color: #ffffff;
             font-weight: 700;
             text-align: center;
             padding: 15px;
-            background: #d3d3d3; /* Vaaleanharmaa */
+            background: #d3d3d3;
             border-radius: 10px;
             border: 2px solid #1e3a8a;
-            width: 100%;
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
+            width: 80%;
+            margin-top: 20px;
         }
         .info {
             font-size: 0.9em;
             color: #bbbbbb;
         }
         .fixed-value {
-            color: #1e3a8a; /* Tummansininen */
+            color: #1e3a8a;
             font-weight: 600;
         }
         table {
@@ -125,7 +122,7 @@
             border: 1px solid #333333;
         }
         th {
-            background: #1e3a8a; /* Tummansininen taulukko-otsikot */
+            background: #1e3a8a;
             color: #ffffff;
         }
         td {
@@ -158,7 +155,7 @@
             <div class="input-group">
                 <label>Sähkönhinta (€/kWh):</label>
                 <input type="number" id="electricityCost" value="0.8" min="0.01" step="0.01">
-                <button onclick="document.getElementById('electricityCost').value = '0.8'">Suomen-keskiarvo</button>
+                <button onclick="calculateSavings()">Suomen-keskiarvo</button>
                 <span class="info">(Tyypillinen arvo 2025)</span>
             </div>
             <div class="input-group">
@@ -234,7 +231,7 @@
                     datasets: [{
                         label: 'Kustannus (€)',
                         data: [ps2Cost, competitorCost],
-                        backgroundColor: ['#1e3a8a', '#d3d3d3'], // Tummansininen ja vaaleanharmaa
+                        backgroundColor: ['#1e3a8a', '#d3d3d3'],
                         borderWidth: 1
                     }]
                 },
@@ -244,6 +241,14 @@
                 }
             });
         }
+
+        // Varmistetaan, että painike toimii
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculateButton = document.querySelectorAll('button');
+            calculateButton.forEach(button => {
+                button.addEventListener('click', calculateSavings);
+            });
+        });
     </script>
 </body>
 </html>
