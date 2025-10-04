@@ -30,12 +30,13 @@
     .header {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 15px;
       margin-bottom: 20px;
+      width: 100%;
     }
     .logo {
-      max-width: 120px;
+      max-width: 160px; /* logo isommaksi */
       height: auto;
     }
     h1 {
@@ -71,7 +72,7 @@
       font-weight: 600;
       color: #ffffff;
       min-width: 250px;
-      text-align: left; /* nyt vasempaan reunaan */
+      text-align: left;
       margin-right: 15px;
     }
     input, select {
@@ -86,8 +87,8 @@
     }
     button {
       padding: 12px 25px;
-      background: #003366; /* tummansininen */
-      color: #ffffff; /* valkoinen teksti */
+      background: #003366;
+      color: #ffffff;
       border: none;
       border-radius: 5px;
       cursor: pointer;
@@ -124,12 +125,13 @@
       background: #003366;
       border-radius: 10px;
       border: 2px solid #ffffff;
-      width: 80%;
       margin-top: 20px;
+      width: 100%; /* sama leveys kuin taulukolla */
     }
     .info {
       font-size: 0.9em;
       color: #bbbbbb;
+      margin-left: 10px;
     }
     .fixed-value {
       color: #ffffff;
@@ -166,7 +168,7 @@
         <div class="input-group">
           <label>Valittu laite:</label>
           <select id="device">
-            <option value="generic">Yleisesti käytetty asennoitin Suomessa</option>
+            <option value="generic">Nykyinen asennoitin</option>
             <option value="custom">Muu laite</option>
           </select>
         </div>
@@ -176,21 +178,27 @@
           <span class="info">(Kiinteä arvo)</span>
         </div>
         <div class="input-group">
-          <label>Yleisesti käytetyn asennoittimen paineilmankulutus:</label>
+          <label>Nykyinen asennoitin (Nm³/h):</label>
           <input type="number" id="competitorConsumption" value="0.931" min="0.001" max="5" step="0.001" placeholder="Nm³/h">
           <span class="info">(Oletus: 0.931 Nm³/h)</span>
         </div>
         <div class="input-group">
           <label>Sähkönhinta (€/kWh):</label>
-          <input type="number" id="electricityCost" value="0.8" min="0.01" step="0.01">
-          <button onclick="document.getElementById('electricityCost').value = '0.8'; calculateSavings();">Suomen-keskiarvo</button>
+          <input type="number" id="electricityCost" value="0.07" min="0.01" step="0.01">
           <span class="info">(Tyypillinen arvo 2025)</span>
         </div>
         <div class="input-group">
           <label>Vertailuaika (vuodet):</label>
           <select id="years">
             <option value="1">1</option>
-            <option value="5">5</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5" selected>5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
             <option value="10">10</option>
           </select>
           <span class="info">(Oletus: 24/7 käyttö valitun ajanjakson aikana)</span>
@@ -231,8 +239,8 @@
     function calculateSavings() {
       const competitorConsumptionInput = document.getElementById('competitorConsumption').value.replace(',', '.');
       const competitorConsumption = parseFloat(competitorConsumptionInput) || 0.931;
-      const electricityCost = parseFloat(document.getElementById('electricityCost').value) || 0.8;
-      const years = parseInt(document.getElementById('years').value) || 1;
+      const electricityCost = parseFloat(document.getElementById('electricityCost').value) || 0.07;
+      const years = parseInt(document.getElementById('years').value) || 5;
       const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
       const ps2Consumption = 0.01;
@@ -251,7 +259,7 @@
       table.innerHTML = `
         <tr><th>Laitteet</th><th>Paineilma (Nm³/h)</th><th>Energia (kWh/v)</th><th>Kustannus (€)</th></tr>
         <tr><td>Siemens SIPART PS2</td><td>${ps2Consumption.toFixed(3)}</td><td>${(ps2Energy / years).toFixed(2)}</td><td>${ps2Cost.toFixed(2)}</td></tr>
-        <tr><td>Yleisesti käytetty asennoitin Suomessa</td><td>${competitorConsumption.toFixed(3)}</td><td>${(competitorEnergy / years).toFixed(2)}</td><td>${competitorCost.toFixed(2)}</td></tr>
+        <tr><td>Nykyinen asennoitin</td><td>${competitorConsumption.toFixed(3)}</td><td>${(competitorEnergy / years).toFixed(2)}</td><td>${competitorCost.toFixed(2)}</td></tr>
       `;
 
       const barCtx = document.getElementById('barChart').getContext('2d');
@@ -259,7 +267,7 @@
       barChart = new Chart(barCtx, {
         type: 'bar',
         data: {
-          labels: ['SIPART PS2', 'Yleisesti käytetty asennoitin'],
+          labels: ['SIPART PS2', 'Nykyinen asennoitin'],
           datasets: [{
             label: 'Kustannus (€)',
             data: [ps2Cost, competitorCost],
