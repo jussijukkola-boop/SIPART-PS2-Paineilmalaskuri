@@ -169,6 +169,70 @@
       color: #ffffff;
       background-color: #2a2a2a;
     }
+
+    /* ------------------- RESPONSIVE STYLE ------------------- */
+    @media (max-width: 900px) {
+      body {
+        align-items: flex-start;
+      }
+
+      .container {
+        width: 100%;
+        padding: 20px;
+        border-radius: 0;
+      }
+
+      .logo {
+        position: relative;
+        top: 0;
+        left: 0;
+        margin-bottom: 10px;
+        max-width: 120px;
+      }
+
+      h1 {
+        font-size: 1.8em;
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .content {
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      .calculator, .results {
+        width: 100%;
+        max-width: 100%;
+        margin-right: 0;
+      }
+
+      label {
+        min-width: 100%;
+        text-align: left;
+        margin-bottom: 5px;
+      }
+
+      .input-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      input, select {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      button {
+        align-self: center;
+        width: 100%;
+      }
+
+      table, .savings {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
